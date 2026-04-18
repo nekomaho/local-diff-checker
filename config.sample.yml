@@ -1,0 +1,7 @@
+storage_dir: './data'
+port: 4567
+
+# List of git repository paths to display as options
+# repo_paths:
+#   - /path/to/repo1
+#   - /path/to/repo2

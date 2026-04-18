@@ -1,0 +1,218 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #24292e;
+  --header-border: #eaecef;
+  --table-border: #dfe1e4;
+  --ln-bg: #f6f8fa;
+  --ln-color: rgba(27,31,35,0.3);
+  --removed-bg: #ffeef0;
+  --added-bg: #e6ffed;
+  --unmodified-bg: #ffffff;
+  --empty-bg: #fafafa;
+  --hunk-bg: #f1f8ff;
+  --hunk-text: rgba(27,31,35,0.7);
+  --comment-bg: #fffbdd;
+  --comment-border: #d1d5da;
+  --form-bg: #f6f8fa;
+  --link-color: #0366d6;
+  --btn-cancel-bg: #fafbfc;
+  --btn-cancel-text: #24292e;
+}
+
+[data-theme="dark"] {
+  --bg-color: #0d1117;
+  --text-color: #c9d1d9;
+  --header-border: #30363d;
+  --table-border: #30363d;
+  --ln-bg: #161b22;
+  --ln-color: #8b949e;
+  --removed-bg: #490202;
+  --added-bg: #04260d;
+  --unmodified-bg: #0d1117;
+  --empty-bg: #161b22;
+  --hunk-bg: #161b22;
+  --hunk-text: #58a6ff;
+  --comment-bg: #161b22;
+  --comment-border: #30363d;
+  --form-bg: #161b22;
+  --link-color: #58a6ff;
+  --btn-cancel-bg: #21262d;
+  --btn-cancel-text: #c9d1d9;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  margin: 20px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--header-border);
+  margin-bottom: 10px;
+  padding-bottom: 0.3em;
+}
+
+.header-container h1 {
+  border-bottom: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dark mode toggle */
+.theme-toggle {
+  z-index: 1000;
+}
+.theme-toggle button {
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--table-border);
+  background: var(--btn-cancel-bg);
+  color: var(--btn-cancel-text);
+  font-size: 12px;
+}
+
+.diff-table { width: 100%; border-collapse: collapse; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; table-layout: fixed; }
+.diff-table td { border: none; padding: 0; vertical-align: top; }
+.ln { width: 45px; padding: 2px 4px !important; text-align: right; color: var(--ln-color); background: var(--ln-bg); user-select: none; border-right: 1px solid var(--table-border); }
+
+.removed { background-color: var(--removed-bg); }
+.added { background-color: var(--added-bg); }
+.unmodified { background-color: var(--unmodified-bg); }
+.empty { background-color: var(--empty-bg); }
+.hunk-header {
+  background-color: var(--hunk-bg);
+  color: var(--hunk-text);
+  padding: 4px 10px !important;
+  border-top: 1px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.line-container { display: flex; flex-direction: column; }
+.line-text-wrapper {
+  position: relative; padding: 2px 4px; min-height: 1.5em;
+  white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;
+}
+
+/* Syntax highlighting tweaks */
+.line-text-wrapper code { padding: 0; background: transparent; font-family: inherit; font-size: inherit; }
+.removed .hljs { background-color: transparent; color: inherit; }
+.added .hljs { background-color: transparent; color: inherit; }
+.unmodified .hljs { background-color: transparent; color: inherit; }
+
+.inner-diff-highlight { background-color: rgba(255, 129, 130, 0.4); border-radius: 2px; }
+.added .inner-diff-highlight { background-color: rgba(52, 208, 88, 0.4); }
+
+.add-comment-btn {
+  position: absolute; right: 2px; top: 2px;
+  display: none; cursor: pointer; background: #0366d6; color: white;
+  border: none; border-radius: 3px; width: 20px; height: 20px; line-height: 18px; text-align: center;
+  z-index: 10; font-family: sans-serif;
+}
+.line-text-wrapper:hover .add-comment-btn { display: block; }
+
+.comments-area { padding: 4px 8px; border-top: 1px solid var(--table-border); background: var(--unmodified-bg); font-family: -apple-system, sans-serif; }
+.comment-box { background: var(--comment-bg); border: 1px solid var(--comment-border); border-radius: 3px; margin-bottom: 4px; padding: 6px; font-size: 12px; }
+.comment-text { white-space: normal; }
+.comment-text p { margin: 4px 0; }
+.comment-text code { background-color: rgba(110,118,129,0.4); padding: 0.2em 0.4em; border-radius: 3px; font-family: monospace; }
+.comment-actions { font-size: 10px; margin-top: 4px; text-align: right; color: var(--ln-color); }
+.comment-actions a { color: var(--link-color); text-decoration: none; margin-left: 8px; cursor: pointer; }
+
+.comment-form { background: var(--form-bg); border: 1px solid var(--comment-border); border-radius: 3px; padding: 8px; margin: 4px 0; }
+.comment-form textarea {
+  width: 100%; border: 1px solid var(--comment-border); border-radius: 3px; padding: 4px; box-sizing: border-box; font-size: 12px; resize: vertical;
+  background: var(--bg-color); color: var(--text-color);
+}
+.form-actions { margin-top: 4px; text-align: right; }
+.btn { padding: 2px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; border: 1px solid rgba(27,31,35,0.15); }
+.btn-primary { background-color: #2ea44f; color: white; }
+.btn-cancel { background-color: var(--btn-cancel-bg); color: var(--btn-cancel-text); margin-right: 4px; }
+.btn-link { background: none; border: none; color: var(--link-color); padding: 0; font-size: 11px; cursor: pointer; text-decoration: none; }
+.btn-link:hover { text-decoration: underline; }
+
+a { color: var(--link-color); }
+
+/* Form inputs on index */
+input[type="text"], .manual-input {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--table-border);
+  padding: 8px;
+  border-radius: 3px;
+  width: 300px;
+}
+
+.main-form {
+  max-width: 600px;
+  margin: 20px 0;
+}
+
+.repo-selection {
+  margin-bottom: 20px;
+}
+
+.repo-selection h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.repo-list {
+  border: 1px solid var(--header-border);
+  border-radius: 6px;
+  padding: 10px;
+  background-color: var(--form-bg);
+}
+
+.repo-option {
+  padding: 8px;
+  border-bottom: 1px solid var(--header-border);
+}
+
+.repo-option:last-child {
+  border-bottom: none;
+}
+
+.repo-option label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.repo-option input[type="radio"] {
+  margin-right: 10px;
+}
+
+.repo-path-text {
+  word-break: break-all;
+}
+
+.manual-input {
+  margin-top: 8px;
+  margin-left: 26px;
+  width: calc(100% - 40px);
+}
+
+.mode-selection {
+  margin-bottom: 20px;
+}
+
+.mode-selection label {
+  display: inline-block;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.btn-primary.main-submit {
+  padding: 8px 20px;
+  font-size: 1.1em;
+}

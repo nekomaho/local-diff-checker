@@ -1,5 +1,57 @@
-<h1>Local Diff Checker</h1>
-<form action="/diff" method="get">
-  <input type="text" name="path" placeholder="Path to git repository">
-  <button type="submit">Check Diff</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Local Diff Checker</title>
+  <link rel="stylesheet" id="hljs-style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/js/app.js"></script>
+</head>
+<body>
+  <div class="header-container">
+    <h1>Local Diff Checker</h1>
+    <div class="theme-toggle">
+      <button id="theme-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
+  </div>
+
+  <form action="/diff_router" method="get" class="main-form">
+    <% if @repo_paths.any? %>
+      <div class="repo-selection">
+        <h3>Select Repository:</h3>
+        <div class="repo-list">
+          <% @repo_paths.each do |p| %>
+            <div class="repo-option">
+              <label>
+                <input type="radio" name="path" value="<%= p %>" <%= 'checked' if p == @last_path %>>
+                <span class="repo-path-text"><%= p %></span>
+              </label>
+            </div>
+          <% end %>
+          <div class="repo-option">
+            <label>
+              <input type="radio" name="path" value="manual" id="radio-manual" <%= 'checked' if @last_path && !@repo_paths.include?(@last_path) || (!@last_path && @repo_paths.empty?) %>>
+              <span>Manual Path:</span>
+            </label>
+            <input type="text" name="manual_path" value="<%= @last_path if @last_path && !@repo_paths.include?(@last_path) %>" placeholder="/path/to/repo" class="manual-input" onfocus="document.getElementById('radio-manual').checked = true;">
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="repo-selection">
+        <input type="text" name="path" value="<%= @last_path %>" placeholder="Path to git repository" style="width: 300px; padding: 8px;">
+      </div>
+    <% end %>
+
+    <div class="mode-selection">
+      <label>
+        <input type="radio" name="mode" value="committed" checked> Committed Changes (Base vs Branch)
+      </label><br>
+      <label>
+        <input type="radio" name="mode" value="unstaged"> Unstaged Changes (Working Directory vs HEAD)
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary main-submit">Check Diff</button>
+  </form>
+</body>
+</html>

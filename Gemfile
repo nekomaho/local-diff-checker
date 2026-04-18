@@ -4,6 +4,9 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'yaml'
 gem 'json'
+gem 'puma'
+gem 'rackup'
+gem 'commonmarker'
 
 group :development, :test do
   gem 'rspec'

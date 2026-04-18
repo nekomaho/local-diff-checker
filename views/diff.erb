@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Diff: <%= @branch %></title>
+  <link rel="stylesheet" id="hljs-style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/js/app.js"></script>
+</head>
+<body>
+  <div class="header-container">
+    <h1>
+      <% if @mode == :unstaged %>
+        Unstaged Changes for <%= @branch %>
+      <% else %>
+        Diff for <%= @branch %> (base: <%= @base || 'None found' %>)
+      <% end %>
+    </h1>
+    <div class="theme-toggle">
+      <button id="theme-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
+  </div>
+  <p>File: <%= @filename %></p>
+  <a href="/">Back to Home</a>
+
+  <% if @mode == :committed && @base.nil? %>
+    <p style="color: red;">Error: Could not find a base branch (main, master, develop, etc.) to compare against.</p>
+  <% elsif @parsed_diff.empty? %>
+    <p>No changes detected.</p>
+    <p>Raw diff output: <pre><%= @diff_text %></pre></p>
+  <% end %>
+
+  <% @parsed_diff.each do |file_diff| %>
+    <%
+      extension = File.extname(file_diff[:file]).sub('.', '')
+      lang_class = extension.empty? ? "" : "language-#{extension}"
+    %>
+    <h2><%= file_diff[:file] %></h2>
+    <table class="diff-table">
+      <colgroup>
+        <col style="width: 45px;">
+        <col>
+        <col style="width: 45px;">
+        <col>
+      </colgroup>
+      <% file_diff[:lines].each do |line| %>
+        <% if line[:is_hunk] %>
+          <tr class="hunk-row">
+            <td colspan="4" class="hunk-header"><%= CGI.escapeHTML(line[:content]) %></td>
+          </tr>
+          <% next %>
+        <% end %>
+        <tr class="line-row">
+          <% [ [:left, 'L'], [:right, 'R'] ].each do |side, prefix| %>
+            <td class="ln"><%= line[side][:number] %></td>
+            <td class="<%= line[side][:type] %>">
+              <div class="line-container">
+                <div class="line-text-wrapper"><code class="<%= lang_class %>"><%= line[side][:content] %></code><% if line[side][:number] %><% line_id = "#{file_diff[:file]}:#{prefix}#{line[side][:number]}" %><button class="add-comment-btn" onclick="toggleForm('new-<%= line_id %>')">+</button><% end %></div>
+
+                <% if line[side][:number] %>
+                  <% line_id = "#{file_diff[:file]}:#{prefix}#{line[side][:number]}" %>
+                  <% has_comments = @comments[line_id] && !@comments[line_id].empty? %>
+                  <div class="comments-area" id="area-<%= line_id %>" style="<%= 'display:none;' unless has_comments %>">
+                    <div id="comments-list-<%= line_id %>">
+                      <% (@comments[line_id] || []).each_with_index do |content, idx| %>
+                        <div class="comment-box" id="comment-<%= line_id %>-<%= idx %>">
+                          <div class="comment-text"><%= Commonmarker.to_html(content) %></div>
+                          <div class="comment-actions">
+                            <a onclick="showEditForm('<%= line_id %>', <%= idx %>)">Edit</a>
+                            <a onclick="confirmDelete('<%= line_id %>', <%= idx %>)">Delete</a>
+                          </div>
+                        </div>
+
+                        <div id="edit-form-<%= line_id %>-<%= idx %>" class="comment-form" style="display:none;">
+                          <form action="/comment/update" method="post">
+                            <input type="hidden" name="filename" value="<%= @filename %>">
+                            <input type="hidden" name="path" value="<%= @path %>">
+                            <input type="hidden" name="mode" value="<%= @mode %>">
+                            <input type="hidden" name="line_id" value="<%= line_id %>">
+                            <input type="hidden" name="index" value="<%= idx %>">
+                            <textarea name="content" rows="6"><%= content %></textarea>
+                            <div class="form-actions">
+                              <button type="button" class="btn btn-cancel" onclick="hideEditForm('<%= line_id %>', <%= idx %>)">Cancel</button>
+                              <button type="submit" class="btn btn-primary">Update</button>
+                            </div>
+                          </form>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <% if has_comments %>
+                      <div id="add-btn-container-<%= line_id %>" style="margin-top: 4px;">
+                        <button type="button" class="btn-link" onclick="toggleForm('new-<%= line_id %>')">+ Add a comment</button>
+                      </div>
+                    <% end %>
+
+                    <div id="form-new-<%= line_id %>" class="comment-form" style="display:none;">
+                      <form action="/comment" method="post">
+                        <input type="hidden" name="filename" value="<%= @filename %>">
+                        <input type="hidden" name="path" value="<%= @path %>">
+                        <input type="hidden" name="mode" value="<%= @mode %>">
+                        <input type="hidden" name="line_id" value="<%= line_id %>">
+                        <textarea name="content" rows="6" placeholder="Leave a comment"></textarea>
+                        <div class="form-actions">
+                          <button type="button" class="btn btn-cancel" onclick="toggleForm('new-<%= line_id %>')">Cancel</button>
+                          <button type="submit" class="btn btn-primary">Add Comment</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+
+  <form id="delete-form" action="/comment/delete" method="post" style="display:none;">
+    <input type="hidden" name="filename" value="<%= @filename %>">
+    <input type="hidden" name="path" value="<%= @path %>">
+    <input type="hidden" name="mode" value="<%= @mode %>">
+    <input type="hidden" name="line_id" id="delete-line-id">
+    <input type="hidden" name="index" id="delete-index">
+  </form>
+
+</body>
+</html>

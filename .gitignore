@@ -1,0 +1,6 @@
+tmp/
+config.yml
+.bundle/
+vendor/bundle/
+data/*
+!data/.gitkeep
