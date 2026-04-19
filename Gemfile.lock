@@ -6,7 +6,7 @@ GEM
       rb_sys (~> 0.9)
     commonmarker (2.8.1-arm64-darwin)
     diff-lcs (1.6.2)
-    json (2.19.3)
+    json (2.19.4)
     logger (1.7.0)
     multi_json (1.20.1)
     mustermann (3.1.1)
