@@ -50,17 +50,20 @@ class LocalDiffChecker < Sinatra::Base
     @branch = @git.current_branch
     @base = @git.base_branch
     @diff_text = @git.diff_with_base
+    @repo_name = @git.repo_name
+    @commit_hash = @git.current_commit_hash
+    prefix = "#{@repo_name}-#{@branch.gsub('/', '--')}-#{@commit_hash}"
 
     metadata = {
       branch: @branch,
       base_branch: @base,
       base_commit: @git.merge_base_hash,
-      current_commit: @git.current_commit_hash,
+      current_commit: @commit_hash,
       generated_at: Time.now.to_s,
       mode: @mode
     }
 
-    @filename = settings.storage.save(@branch, metadata, @diff_text)
+    @filename = settings.storage.save(prefix, metadata, @diff_text)
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
     @comments = @data[:comments]
@@ -80,15 +83,18 @@ class LocalDiffChecker < Sinatra::Base
     @branch = @git.current_branch
     @base = @git.base_branch
     @diff_text = @git.diff_unstaged
+    @repo_name = @git.repo_name
+    @commit_hash = @git.current_commit_hash
+    prefix = "#{@repo_name}-#{@branch.gsub('/', '--')}-#{@commit_hash}"
 
     metadata = {
       branch: @branch,
-      current_commit: "#{@git.current_commit_hash} (unstaged)",
+      current_commit: "#{@commit_hash} (unstaged)",
       generated_at: Time.now.to_s,
       mode: @mode
     }
 
-    @filename = settings.storage.save(@branch, metadata, @diff_text, "_uncommited")
+    @filename = settings.storage.save(prefix, metadata, @diff_text, "_uncommited")
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
     @comments = @data[:comments]

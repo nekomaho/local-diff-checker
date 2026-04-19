@@ -7,8 +7,9 @@ class MarkdownStorage
     FileUtils.mkdir_p(@storage_dir)
   end
 
-  def next_filename(branch, suffix = nil)
-    pattern = suffix ? "#{branch}-*#{suffix}.md" : "#{branch}-*.md"
+  def next_filename(prefix, suffix = nil)
+    prefix = prefix.gsub('/', '--')
+    pattern = suffix ? "#{prefix}-*#{suffix}.md" : "#{prefix}-*.md"
     files = Dir.glob(File.join(@storage_dir, pattern))
     if suffix
       files = files.select { |f| f.end_with?("#{suffix}.md") }
@@ -17,16 +18,17 @@ class MarkdownStorage
     end
 
     if files.empty?
-      suffix ? "#{branch}-1#{suffix}.md" : "#{branch}-1.md"
+      suffix ? "#{prefix}-1#{suffix}.md" : "#{prefix}-1.md"
     else
       regex = suffix ? /-(\d+)#{Regexp.escape(suffix)}\.md$/ : /-(\d+)\.md$/
       numbers = files.map { |f| f.match(regex)[1].to_i }
-      suffix ? "#{branch}-#{numbers.max + 1}#{suffix}.md" : "#{branch}-#{numbers.max + 1}.md"
+      suffix ? "#{prefix}-#{numbers.max + 1}#{suffix}.md" : "#{prefix}-#{numbers.max + 1}.md"
     end
   end
 
-  def get_latest_file(branch, suffix = nil)
-    pattern = suffix ? "#{branch}-*#{suffix}.md" : "#{branch}-*.md"
+  def get_latest_file(prefix, suffix = nil)
+    prefix = prefix.gsub('/', '--')
+    pattern = suffix ? "#{prefix}-*#{suffix}.md" : "#{prefix}-*.md"
     files = Dir.glob(File.join(@storage_dir, pattern))
     
     if suffix
@@ -42,15 +44,16 @@ class MarkdownStorage
     { filename: File.basename(latest_path), content: load(File.basename(latest_path)) }
   end
 
-  def save(branch, metadata, diff_text, suffix = nil)
-    latest = get_latest_file(branch, suffix)
+  def save(prefix, metadata, diff_text, suffix = nil)
+    prefix = prefix.gsub('/', '--')
+    latest = get_latest_file(prefix, suffix)
     
     if latest && latest[:content][:metadata][:current_commit] == metadata[:current_commit] && 
        latest[:content][:diff].strip == diff_text.strip
       return latest[:filename]
     end
 
-    filename = next_filename(branch, suffix)
+    filename = next_filename(prefix, suffix)
     # When creating a new file, inherit comments from the latest file
     initial_comments = latest ? latest[:content][:comments] : {}
     write_file(filename, metadata, diff_text, initial_comments)

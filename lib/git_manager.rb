@@ -77,4 +77,11 @@ class GitManager
       hash.strip
     end
   end
+
+  def repo_name
+    Dir.chdir(@path) do
+      toplevel, _ = Open3.capture2('git rev-parse --show-toplevel')
+      File.basename(toplevel.strip)
+    end
+  end
 end
