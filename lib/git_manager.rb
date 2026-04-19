@@ -22,25 +22,36 @@ class GitManager
     end
   end
 
-  def base_branch
+  def base_branch(provided_base = nil)
+    return provided_base if provided_base && !provided_base.empty?
+    default_branch
+  end
+
+  def default_branch
     Dir.chdir(@path) do
-      current = current_branch
-      # User provided logic to find the parent branch
-      cmd = "git show-branch | grep '*' | grep -v '#{current}' | head -1 | awk -F'[]~^[]' '{print $2}'"
-      stdout, status = Open3.capture2(cmd)
-      return nil unless status.success?
+      # Try to get the default branch from origin
+      stdout, status = Open3.capture2("git remote show origin | grep 'HEAD branch' | cut -d' ' -f5")
+      if status.success? && !stdout.strip.empty?
+        return stdout.strip
+      end
+
+      # Fallback to common names if no origin
+      ['main', 'master', 'develop'].each do |b|
+        _, s = Open3.capture2("git rev-parse --verify #{b}")
+        return b if s.success?
+      end
       
-      base = stdout.strip
-      base.empty? ? nil : base
+      # Final fallback to current branch
+      current_branch
     end
   end
 
-  def diff_with_base
-    base = base_branch
+  def diff_with_base(base = nil)
+    base ||= default_branch
     return nil unless base
     Dir.chdir(@path) do
       # Get unified diff (-U3) for split display
-      diff, _ = Open3.capture2("git diff #{base}..HEAD")
+      diff, _ = Open3.capture2("git diff #{base}...HEAD")
       diff
     end
   end
@@ -62,8 +73,8 @@ class GitManager
     end
   end
 
-  def merge_base_hash
-    base = base_branch
+  def merge_base_hash(base = nil)
+    base ||= default_branch
     return nil unless base
     Dir.chdir(@path) do
       hash, _ = Open3.capture2("git merge-base #{base} HEAD")

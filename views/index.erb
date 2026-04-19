@@ -44,14 +44,33 @@
     <% end %>
 
     <div class="mode-selection">
-      <label>
-        <input type="radio" name="mode" value="committed" checked> Committed Changes (Base vs Branch)
-      </label><br>
-      <label>
-        <input type="radio" name="mode" value="unstaged"> Unstaged Changes (Working Directory vs HEAD)
-      </label>
+      <div class="mode-option">
+        <label>
+          <input type="radio" name="mode" value="committed" checked onclick="toggleBaseInput(true)"> Committed Changes (Base vs Branch)
+        </label>
+        <div id="base-branch-container" class="sub-input">
+          <label for="base_branch">Base Branch:</label>
+          <input type="text" name="base" id="base_branch" value="<%= @last_base %>" placeholder="e.g. main (default if empty)" class="manual-input">
+        </div>
+      </div>
+      <div class="mode-option">
+        <label>
+          <input type="radio" name="mode" value="unstaged" onclick="toggleBaseInput(false)"> Unstaged Changes (Working Directory vs HEAD)
+        </label>
+      </div>
     </div>
     <button type="submit" class="btn btn-primary main-submit">Check Diff</button>
   </form>
+
+  <script>
+    function toggleBaseInput(show) {
+      const container = document.getElementById('base-branch-container');
+      container.style.display = show ? 'block' : 'none';
+      const input = document.getElementById('base_branch');
+      input.disabled = !show;
+    }
+    // Initialize
+    toggleBaseInput(document.querySelector('input[name="mode"]:checked').value === 'committed');
+  </script>
 </body>
 </html>

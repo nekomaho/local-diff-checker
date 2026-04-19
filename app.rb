@@ -73,6 +73,7 @@ class LocalDiffChecker < Sinatra::Base
 
   get '/' do
     @last_path = session[:last_path]
+    @last_base = session[:last_base]
     @repo_paths = settings.config['repo_paths'] || []
     erb :index
   end
@@ -82,10 +83,12 @@ class LocalDiffChecker < Sinatra::Base
     path = params[:manual_path] if path == 'manual'
     session[:last_path] = path
     mode = params[:mode]
+    base = params[:base]
+    session[:last_base] = base
     if mode == 'unstaged'
       redirect "/diff/unstaged?path=#{path}"
     else
-      redirect "/diff?path=#{path}"
+      redirect "/diff?path=#{path}&base=#{base}"
     end
   end
 
@@ -99,8 +102,8 @@ class LocalDiffChecker < Sinatra::Base
     end
 
     @branch = @git.current_branch
-    @base = @git.base_branch
-    @diff_text = @git.diff_with_base
+    @base = @git.base_branch(params[:base])
+    @diff_text = @git.diff_with_base(@base)
     @repo_name = @git.repo_name
     @commit_hash = @git.current_commit_hash
     prefix = "#{@repo_name}-#{@branch.gsub('/', '--')}-#{@commit_hash}"
@@ -108,7 +111,7 @@ class LocalDiffChecker < Sinatra::Base
     metadata = {
       branch: @branch,
       base_branch: @base,
-      base_commit: @git.merge_base_hash,
+      base_commit: @git.merge_base_hash(@base),
       current_commit: @commit_hash,
       generated_at: Time.now.to_s,
       mode: @mode
