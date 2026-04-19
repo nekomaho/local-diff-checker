@@ -99,6 +99,11 @@ RSpec.describe MarkdownStorage do
     expect(f2).to eq "#{prefix}-1_uncommited.md"
   end
 
+  it 'handles nil diff_text gracefully in save' do
+    metadata = { branch: 'branch', current_commit: 'abc' }
+    expect { subject.save(prefix, metadata, nil) }.not_to raise_error
+  end
+
   it 'handles prefix with slashes by replacing them with double hyphens' do
     prefix_with_slash = 'repo-feature/branch-hash'
     expected_prefix = 'repo-feature--branch-hash'

@@ -52,4 +52,9 @@ RSpec.describe DiffParser do
     expect(left).to include("<span class='inner-diff-highlight'>w</span>")
     expect(right).to include("<span class='inner-diff-highlight'>u</span>")
   end
+
+  it 'returns empty array when diff_text is nil' do
+    parser = DiffParser.new(nil)
+    expect(parser.parse).to eq([])
+  end
 end
