@@ -74,6 +74,19 @@ RSpec.describe MarkdownStorage do
     expect(loaded[:comments]['file.txt:L10']).to be_nil
   end
 
+  it 'sets approved status' do
+    metadata = { branch: 'branch', current_commit: 'abc' }
+    filename = subject.save(prefix, metadata, "diff")
+    
+    subject.set_approved(filename, true)
+    loaded = subject.load(filename)
+    expect(loaded[:metadata][:approved]).to be true
+
+    subject.set_approved(filename, false)
+    loaded = subject.load(filename)
+    expect(loaded[:metadata][:approved]).to be false
+  end
+
   it 'handles filename with suffix correctly' do
     metadata = { branch: 'branch', current_commit: 'abc' }
     filename = subject.save(prefix, metadata, "unstaged diff", "_uncommited")

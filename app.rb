@@ -255,5 +255,20 @@ class LocalDiffChecker < Sinatra::Base
     end
   end
 
+  post '/approve' do
+    filename = params[:filename]
+    approved = params[:approved] == 'true'
+    path = params[:path]
+    mode = params[:mode]
+
+    settings.storage.set_approved(filename, approved)
+
+    if mode == 'unstaged'
+      redirect "/diff/unstaged?path=#{path}"
+    else
+      redirect "/diff?path=#{path}"
+    end
+  end
+
   run! if app_file == $0
 end

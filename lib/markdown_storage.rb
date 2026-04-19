@@ -84,6 +84,12 @@ class MarkdownStorage
     end
   end
 
+  def set_approved(filename, approved)
+    data = load(filename)
+    data[:metadata][:approved] = approved
+    write_file(filename, data[:metadata], data[:diff], data[:comments])
+  end
+
   def load(filename)
     path = File.join(@storage_dir, filename)
     content = File.read(path)
