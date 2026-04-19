@@ -24,27 +24,14 @@ class GitManager
 
   def base_branch
     Dir.chdir(@path) do
-      # 1. Get the current branch name
       current = current_branch
+      # User provided logic to find the parent branch
+      cmd = "git show-branch | grep '*' | grep -v '#{current}' | head -1 | awk -F'[]~^[]' '{print $2}'"
+      stdout, status = Open3.capture2(cmd)
+      return nil unless status.success?
       
-      # 2. Candidate branches for comparison (local and remote)
-      candidates = [
-        'main', 'master', 'develop',
-        'origin/main', 'origin/master', 'origin/develop'
-      ]
-      
-      candidates.each do |b|
-        next if b == current # Do not compare with itself
-        
-        # Check if the branch exists
-        _, status = Open3.capture2("git rev-parse --verify #{b}")
-        next unless status.success?
-
-        # Check if there is a common ancestor
-        stdout, status = Open3.capture2("git merge-base #{b} HEAD")
-        return b if status.success?
-      end
-      nil
+      base = stdout.strip
+      base.empty? ? nil : base
     end
   end
 
