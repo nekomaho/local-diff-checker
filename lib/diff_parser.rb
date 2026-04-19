@@ -16,6 +16,8 @@ class DiffParser
     pending_removals = []
     pending_additions = []
 
+    return [] if @diff_text.nil?
+
     @diff_text.each_line do |line|
       if line.start_with?('diff --git')
         flush_pending(current_file, pending_removals, pending_additions) if current_file

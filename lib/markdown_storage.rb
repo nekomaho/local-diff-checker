@@ -49,7 +49,7 @@ class MarkdownStorage
     latest = get_latest_file(prefix, suffix)
     
     if latest && latest[:content][:metadata][:current_commit] == metadata[:current_commit] && 
-       latest[:content][:diff].strip == diff_text.strip
+       latest[:content][:diff]&.strip == diff_text&.strip
       return latest[:filename]
     end
 
