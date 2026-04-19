@@ -74,6 +74,26 @@ RSpec.describe LocalDiffChecker do
     expect(last_response.body).to include('Interesting change')
   end
 
+  it 'approves a diff' do
+    # First render to create the markdown file and get the current filename
+    get '/diff', path: repo_path
+    filename = last_response.body.match(/File: (.+\.md)/)[1]
+    expect(last_response.body).to include('Approve')
+
+    post '/approve', {
+      filename: filename,
+      approved: 'true',
+      path: repo_path,
+      mode: 'committed'
+    }
+
+    expect(last_response.status).to eq 302 # Redirect back
+
+    # Verify approval state in view
+    follow_redirect!
+    expect(last_response.body).to include('✓ Approved (Cancel)')
+  end
+
   it 'renders unstaged diff' do
     # Make changes to the working directory
     Dir.chdir(repo_path) do

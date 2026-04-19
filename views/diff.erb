@@ -16,8 +16,24 @@
         Diff for <%= @branch %> (base: <%= @base || 'None found' %>)
       <% end %>
     </h1>
-    <div class="theme-toggle">
-      <button id="theme-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="header-actions">
+      <div class="approve-container">
+        <form action="/approve" method="post">
+          <input type="hidden" name="filename" value="<%= @filename %>">
+          <input type="hidden" name="path" value="<%= @path %>">
+          <input type="hidden" name="mode" value="<%= @mode %>">
+          <% if @data[:metadata][:approved] %>
+            <input type="hidden" name="approved" value="false">
+            <button type="submit" class="btn btn-approved">✓ Approved (Cancel)</button>
+          <% else %>
+            <input type="hidden" name="approved" value="true">
+            <button type="submit" class="btn btn-approve">Approve</button>
+          <% end %>
+        </form>
+      </div>
+      <div class="theme-toggle">
+        <button id="theme-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+      </div>
     </div>
   </div>
   <p>File: <%= @filename %></p>
