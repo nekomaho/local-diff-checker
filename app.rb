@@ -20,6 +20,57 @@ class LocalDiffChecker < Sinatra::Base
   set :port, settings.config['port'] || 4567
   set :storage, MarkdownStorage.new(settings.config['storage_dir'] || './data')
 
+  helpers do
+    def fill_gaps(parsed_diff, git, mode)
+      revision = (mode == :unstaged ? nil : 'HEAD')
+      parsed_diff.each do |file_diff|
+        new_lines = []
+        current_left = 1
+        current_right = 1
+        file_path = file_diff[:file]
+        
+        total_lines = git.line_count(file_path, revision)
+
+        file_diff[:lines].each do |line|
+          if line[:is_hunk]
+            h_left_start = line[:left][:start]
+            h_right_start = line[:right][:start]
+            
+            if h_right_start > current_right
+              new_lines << {
+                is_gap: true,
+                left_start: current_left,
+                right_start: current_right,
+                count: h_right_start - current_right
+              }
+            end
+            new_lines << line
+            current_left = h_left_start
+            current_right = h_right_start
+          else
+            new_lines << line
+            if line[:left][:number]
+              current_left = line[:left][:number] + 1
+            end
+            if line[:right][:number]
+              current_right = line[:right][:number] + 1
+            end
+          end
+        end
+        
+        if current_right <= total_lines
+          new_lines << {
+            is_gap: true,
+            left_start: current_left,
+            right_start: current_right,
+            count: total_lines - current_right + 1
+          }
+        end
+        file_diff[:lines] = new_lines
+      end
+    end
+  end
+
   get '/' do
     @last_path = session[:last_path]
     @repo_paths = settings.config['repo_paths'] || []
@@ -66,6 +117,7 @@ class LocalDiffChecker < Sinatra::Base
     @filename = settings.storage.save(prefix, metadata, @diff_text)
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
+    fill_gaps(@parsed_diff, @git, @mode)
     @comments = @data[:comments]
 
     erb :diff
@@ -97,9 +149,34 @@ class LocalDiffChecker < Sinatra::Base
     @filename = settings.storage.save(prefix, metadata, @diff_text, "_uncommited")
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
+    fill_gaps(@parsed_diff, @git, @mode)
     @comments = @data[:comments]
 
     erb :diff
+  end
+
+  get '/api/file_content' do
+    content_type :json
+    repo_path = params[:path]
+    file_path = params[:file]
+    start_line = params[:start].to_i
+    end_line = params[:end].to_i
+    mode = params[:mode]
+    
+    git = GitManager.new(repo_path)
+    revision = (mode == 'unstaged' ? nil : 'HEAD')
+    
+    content = git.file_content(file_path, revision)
+    lines = content.lines
+    
+    # Lines are 1-indexed in the request
+    s = [start_line - 1, 0].max
+    e = [end_line - 1, lines.size - 1].min
+    requested_lines = lines[s..e] || []
+    
+    {
+      lines: requested_lines.map { |l| CGI.escapeHTML(l.chomp) }
+    }.to_json
   end
 
   post '/comment' do
@@ -110,6 +187,17 @@ class LocalDiffChecker < Sinatra::Base
     mode = params[:mode]
 
     settings.storage.add_comment(filename, line_id, content)
+
+    if params[:ajax]
+      content_type :json
+      return { 
+        status: 'success', 
+        line_id: line_id, 
+        content_html: Commonmarker.to_html(content),
+        raw_content: content,
+        index: (settings.storage.load(filename)[:comments][line_id].size - 1)
+      }.to_json
+    end
 
     if mode == 'unstaged'
       redirect "/diff/unstaged?path=#{path}"
@@ -128,6 +216,17 @@ class LocalDiffChecker < Sinatra::Base
 
     settings.storage.update_comment(filename, line_id, index, content)
 
+    if params[:ajax]
+      content_type :json
+      return { 
+        status: 'success', 
+        line_id: line_id, 
+        index: index, 
+        content_html: Commonmarker.to_html(content),
+        raw_content: content
+      }.to_json
+    end
+
     if mode == 'unstaged'
       redirect "/diff/unstaged?path=#{path}"
     else
@@ -143,6 +242,11 @@ class LocalDiffChecker < Sinatra::Base
     mode = params[:mode]
 
     settings.storage.delete_comment(filename, line_id, index)
+
+    if params[:ajax]
+      content_type :json
+      return { status: 'success', line_id: line_id, index: index }.to_json
+    end
 
     if mode == 'unstaged'
       redirect "/diff/unstaged?path=#{path}"

@@ -96,6 +96,41 @@ body {
   word-break: break-all;
 }
 
+.gap-row {
+  background-color: var(--ln-bg);
+}
+
+.gap-cell {
+  padding: 4px 0 !important;
+  text-align: center;
+  border-top: 1px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
+}
+
+.gap-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.expand-btn {
+  background-color: var(--hunk-bg);
+  color: var(--link-color);
+  border: 1px solid var(--table-border);
+  border-radius: 3px;
+  padding: 2px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.expand-btn:hover {
+  background-color: var(--table-border);
+}
+
+.expanded-row {
+  opacity: 0.85;
+}
+
 .line-container { display: flex; flex-direction: column; }
 .line-text-wrapper {
   position: relative; padding: 2px 4px; min-height: 1.5em;
