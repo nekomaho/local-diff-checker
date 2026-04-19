@@ -98,4 +98,14 @@ RSpec.describe MarkdownStorage do
     expect(f1).to eq "#{prefix}-1.md"
     expect(f2).to eq "#{prefix}-1_uncommited.md"
   end
+
+  it 'handles prefix with slashes by replacing them with double hyphens' do
+    prefix_with_slash = 'repo-feature/branch-hash'
+    expected_prefix = 'repo-feature--branch-hash'
+    metadata = { branch: 'feature/branch', current_commit: 'abc' }
+    
+    filename = subject.save(prefix_with_slash, metadata, "diff with slash")
+    expect(filename).to eq "#{expected_prefix}-1.md"
+    expect(File.exist?(File.join(storage_dir, filename))).to be true
+  end
 end

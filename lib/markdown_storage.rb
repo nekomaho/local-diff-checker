@@ -8,6 +8,7 @@ class MarkdownStorage
   end
 
   def next_filename(prefix, suffix = nil)
+    prefix = prefix.gsub('/', '--')
     pattern = suffix ? "#{prefix}-*#{suffix}.md" : "#{prefix}-*.md"
     files = Dir.glob(File.join(@storage_dir, pattern))
     if suffix
@@ -26,6 +27,7 @@ class MarkdownStorage
   end
 
   def get_latest_file(prefix, suffix = nil)
+    prefix = prefix.gsub('/', '--')
     pattern = suffix ? "#{prefix}-*#{suffix}.md" : "#{prefix}-*.md"
     files = Dir.glob(File.join(@storage_dir, pattern))
     
@@ -43,6 +45,7 @@ class MarkdownStorage
   end
 
   def save(prefix, metadata, diff_text, suffix = nil)
+    prefix = prefix.gsub('/', '--')
     latest = get_latest_file(prefix, suffix)
     
     if latest && latest[:content][:metadata][:current_commit] == metadata[:current_commit] && 

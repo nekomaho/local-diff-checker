@@ -52,7 +52,7 @@ class LocalDiffChecker < Sinatra::Base
     @diff_text = @git.diff_with_base
     @repo_name = @git.repo_name
     @commit_hash = @git.current_commit_hash
-    prefix = "#{@repo_name}-#{@branch}-#{@commit_hash}"
+    prefix = "#{@repo_name}-#{@branch.gsub('/', '--')}-#{@commit_hash}"
 
     metadata = {
       branch: @branch,
@@ -85,7 +85,7 @@ class LocalDiffChecker < Sinatra::Base
     @diff_text = @git.diff_unstaged
     @repo_name = @git.repo_name
     @commit_hash = @git.current_commit_hash
-    prefix = "#{@repo_name}-#{@branch}-#{@commit_hash}"
+    prefix = "#{@repo_name}-#{@branch.gsub('/', '--')}-#{@commit_hash}"
 
     metadata = {
       branch: @branch,
