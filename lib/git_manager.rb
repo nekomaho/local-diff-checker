@@ -92,7 +92,7 @@ class GitManager
         return File.read(full_path) if File.exist?(full_path)
         return ""
       end
-      stdout, status = Open3.capture2("git show #{revision}:#{file_path}")
+      stdout, stderr, status = Open3.capture3("git show #{revision}:#{file_path}")
       return "" unless status.success?
       stdout
     end

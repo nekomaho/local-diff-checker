@@ -68,4 +68,13 @@ RSpec.describe GitManager do
     end
     expect(subject.line_count('lines.txt', 'HEAD')).to eq 3
   end
+
+  it 'returns empty string and does not print error when file is deleted' do
+    Dir.chdir(repo_path) do
+      `git rm file.txt`
+      `git commit -m "delete file"`
+    end
+    # This should return empty string without printing "fatal: path ... does not exist" to stderr
+    expect(subject.file_content('file.txt', 'HEAD')).to eq ""
+  end
 end
