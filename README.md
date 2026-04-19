@@ -65,7 +65,7 @@ If `repo_paths` is configured, you can select the target repository from a list 
 - **Repository List**: Frequently used repository paths can be listed in the configuration file for quick selection.
 - **Git Diff View**: Automatically detects differences between the base branch (e.g., main/master) and the current branch, displaying them in a split view.
 - **Commenting Feature**: Allows posting comments on each line of the diff.
-- **Markdown Saving**: Both the Git diff snapshot and your comments are bundled and saved together. Files are named `[branch-name]-[sequence-number].md` for committed changes, or `[branch-name]-[sequence-number]_uncommited.md` for unstaged changes.
+- **Markdown Saving**: Both the Git diff snapshot and your comments are bundled and saved together. Files are named `[repo-name]-[branch-name]-[commit-hash]-[sequence-number].md` for committed changes, or `[repo-name]-[branch-name]-[commit-hash]-[sequence-number]_uncommited.md` for unstaged changes.
 - **Automatic Version Control**: When branch differences are updated, a new sequential Markdown file is automatically generated.
 
 ## License

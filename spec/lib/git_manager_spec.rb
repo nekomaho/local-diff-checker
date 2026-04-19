@@ -47,4 +47,8 @@ RSpec.describe GitManager do
     expect(diff).to include 'base content'
     expect(diff).to include 'new content'
   end
+
+  it 'gets repository name' do
+    expect(subject.repo_name).to eq File.basename(repo_path)
+  end
 end

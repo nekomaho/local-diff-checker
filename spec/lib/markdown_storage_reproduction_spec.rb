@@ -4,7 +4,7 @@ require_relative '../../lib/markdown_storage'
 
 RSpec.describe MarkdownStorage do
   let(:storage_dir) { File.expand_path('../../tmp/spec_data', __dir__) }
-  let(:branch) { 'feature-test' }
+  let(:prefix) { 'repo-feature-hash' }
   subject { MarkdownStorage.new(storage_dir) }
 
   before do
@@ -18,8 +18,8 @@ RSpec.describe MarkdownStorage do
   # end
 
   it 'handles multi-line comments with code blocks correctly' do
-    metadata = { branch: branch, base_commit: 'abc', current_commit: 'def' }
-    filename = subject.save(branch, metadata, "diff content")
+    metadata = { branch: 'feature-test', base_commit: 'abc', current_commit: 'def' }
+    filename = subject.save(prefix, metadata, "diff content")
     
     code_block_comment = <<~COMMENT
       Check this code:
