@@ -25,18 +25,24 @@ class DiffParser
         files << current_file
       elsif line.start_with?('@@')
         flush_pending(current_file, pending_removals, pending_additions) if current_file
-        match = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/)
-        left_line_no = match[1].to_i
-        right_line_no = match[2].to_i
+        # Parse hunk header to get start line and line count for both old (-) and new (+) files.
+        # Format: @@ -start,len +start,len @@
+        match = line.match(/@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@/)
+        left_start = match[1].to_i
+        left_count = (match[2] || "1").to_i
+        right_start = match[3].to_i
+        right_count = (match[4] || "1").to_i
         
         if current_file
           current_file[:lines] << {
             is_hunk: true,
             content: line.chomp,
-            left: { type: 'hunk' },
-            right: { type: 'hunk' }
+            left: { type: 'hunk', start: left_start, count: left_count },
+            right: { type: 'hunk', start: right_start, count: right_count }
           }
         end
+        left_line_no = left_start
+        right_line_no = right_start
       elsif line.start_with?('---') || line.start_with?('+++') || line.start_with?('index')
         next
       elsif current_file

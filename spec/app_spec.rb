@@ -96,4 +96,17 @@ RSpec.describe LocalDiffChecker do
     get '/'
     expect(last_response.body).to include('value="/dummy/path"')
   end
+
+  it 'returns file content via API' do
+    get '/api/file_content', {
+      path: repo_path,
+      file: 'file.txt',
+      start: 1,
+      end: 1,
+      mode: 'committed'
+    }
+    expect(last_response).to be_ok
+    data = JSON.parse(last_response.body)
+    expect(data['lines']).to eq(['change'])
+  end
 end

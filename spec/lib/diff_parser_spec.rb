@@ -30,6 +30,10 @@ RSpec.describe DiffParser do
     
     # Line 0: hunk header
     expect(lines[0][:is_hunk]).to be true
+    expect(lines[0][:left][:start]).to eq 1
+    expect(lines[0][:left][:count]).to eq 3
+    expect(lines[0][:right][:start]).to eq 1
+    expect(lines[0][:right][:count]).to eq 3
     
     # Line 1: unmodified
     expect(lines[1][:left][:number]).to eq 1

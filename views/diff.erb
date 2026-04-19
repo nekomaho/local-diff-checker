@@ -44,6 +44,27 @@
         <col>
       </colgroup>
       <% file_diff[:lines].each do |line| %>
+        <% if line[:is_gap] %>
+          <tr class="gap-row" 
+              data-file="<%= file_diff[:file] %>" 
+              data-left-start="<%= line[:left_start] %>" 
+              data-right-start="<%= line[:right_start] %>" 
+              data-count="<%= line[:count] %>"
+              data-lang="<%= lang_class %>">
+            <td class="ln">...</td>
+            <td colspan="3" class="gap-cell">
+              <div class="gap-controls">
+                <% if line[:count] > 20 %>
+                  <button class="expand-btn" onclick="expandLines(this, 'down')">▼ Expand 20 lines</button>
+                  <button class="expand-btn" onclick="expandLines(this, 'up')">▲ Expand 20 lines</button>
+                <% else %>
+                  <button class="expand-btn" onclick="expandLines(this, 'all')">↕ Expand all <%= line[:count] %> lines</button>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+          <% next %>
+        <% end %>
         <% if line[:is_hunk] %>
           <tr class="hunk-row">
             <td colspan="4" class="hunk-header"><%= CGI.escapeHTML(line[:content]) %></td>
@@ -72,7 +93,7 @@
                         </div>
 
                         <div id="edit-form-<%= line_id %>-<%= idx %>" class="comment-form" style="display:none;">
-                          <form action="/comment/update" method="post">
+                          <form action="/comment/update" method="post" onsubmit="submitCommentForm(event, this)">
                             <input type="hidden" name="filename" value="<%= @filename %>">
                             <input type="hidden" name="path" value="<%= @path %>">
                             <input type="hidden" name="mode" value="<%= @mode %>">
@@ -95,7 +116,7 @@
                     <% end %>
 
                     <div id="form-new-<%= line_id %>" class="comment-form" style="display:none;">
-                      <form action="/comment" method="post">
+                      <form action="/comment" method="post" onsubmit="submitCommentForm(event, this)">
                         <input type="hidden" name="filename" value="<%= @filename %>">
                         <input type="hidden" name="path" value="<%= @path %>">
                         <input type="hidden" name="mode" value="<%= @mode %>">

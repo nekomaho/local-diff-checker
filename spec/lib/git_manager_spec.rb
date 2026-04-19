@@ -51,4 +51,21 @@ RSpec.describe GitManager do
   it 'gets repository name' do
     expect(subject.repo_name).to eq File.basename(repo_path)
   end
+
+  it 'gets file content at a specific revision' do
+    content = subject.file_content('file.txt', 'HEAD')
+    expect(content).to eq 'new content'
+    
+    content_base = subject.file_content('file.txt', 'HEAD~1')
+    expect(content_base).to eq 'base content'
+  end
+
+  it 'gets line count of a file' do
+    Dir.chdir(repo_path) do
+      File.write('lines.txt', "1\n2\n3\n")
+      `git add lines.txt`
+      `git commit -m "add lines.txt"`
+    end
+    expect(subject.line_count('lines.txt', 'HEAD')).to eq 3
+  end
 end

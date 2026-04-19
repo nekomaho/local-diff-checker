@@ -84,4 +84,22 @@ class GitManager
       File.basename(toplevel.strip)
     end
   end
+
+  def file_content(file_path, revision = 'HEAD')
+    Dir.chdir(@path) do
+      if revision.nil? # Working tree
+        full_path = File.join(@path, file_path)
+        return File.read(full_path) if File.exist?(full_path)
+        return ""
+      end
+      stdout, status = Open3.capture2("git show #{revision}:#{file_path}")
+      return "" unless status.success?
+      stdout
+    end
+  end
+
+  def line_count(file_path, revision = 'HEAD')
+    content = file_content(file_path, revision)
+    content.lines.size
+  end
 end
