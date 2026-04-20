@@ -175,15 +175,51 @@ window.submitCommentForm = function(event, form) {
 };
 
 window.copyToClipboard = function(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
+  const onSuccess = () => {
     const originalText = btn.textContent;
     btn.textContent = 'Copied!';
     setTimeout(() => {
       btn.textContent = originalText;
     }, 2000);
-  }).catch(err => {
+  };
+
+  const onError = (err) => {
     console.error('Failed to copy: ', err);
-  });
+    // Final fallback: alert the user with the text to copy
+    alert('Failed to copy automatically. Please copy this manually: ' + text);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(err => {
+      // If clipboard API fails, try execCommand fallback
+      fallbackCopyToClipboard(text, onSuccess, onError);
+    });
+  } else {
+    fallbackCopyToClipboard(text, onSuccess, onError);
+  }
+}
+
+function fallbackCopyToClipboard(text, onSuccess, onError) {
+  try {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Ensure the textarea is not visible but part of the DOM
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    textArea.style.top = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    if (successful) {
+      onSuccess();
+    } else {
+      onError('execCommand unsuccessful');
+    }
+  } catch (err) {
+    onError(err);
+  }
 }
 
 window.expandLines = function(btn, direction) {
