@@ -174,6 +174,18 @@ window.submitCommentForm = function(event, form) {
   });
 };
 
+window.copyToClipboard = function(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 2000);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+
 window.expandLines = function(btn, direction) {
   // This function retrieves hidden file content via API and dynamically inserts it into the diff table.
   // It also updates the 'gap row' to reflect the remaining hidden lines or removes it if fully expanded.
