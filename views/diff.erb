@@ -36,7 +36,7 @@
       </div>
     </div>
   </div>
-  <p>File: <%= @filename %></p>
+  <p>File: <%= @filename %><button class="copy-btn" onclick='copyToClipboard(<%= @filename.to_json %>, this)'>Copy</button></p>
   <a href="/">Back to Home</a>
 
   <% if @mode == :committed && @base.nil? %>

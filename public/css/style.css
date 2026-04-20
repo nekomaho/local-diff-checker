@@ -207,6 +207,22 @@ body {
 .btn-link { background: none; border: none; color: var(--link-color); padding: 0; font-size: 11px; cursor: pointer; text-decoration: none; }
 .btn-link:hover { text-decoration: underline; }
 
+.copy-btn {
+  background-color: var(--btn-cancel-bg);
+  color: var(--btn-cancel-text);
+  border: 1px solid var(--table-border);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.copy-btn:hover {
+  background-color: var(--table-border);
+}
+
 a { color: var(--link-color); }
 
 /* Form inputs on index */

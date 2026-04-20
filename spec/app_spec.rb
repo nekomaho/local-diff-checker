@@ -52,12 +52,13 @@ RSpec.describe LocalDiffChecker do
     expect(last_response).to be_ok
     expect(last_response.body).to include('feat')
     expect(last_response.body).to include('file.txt')
+    expect(last_response.body).to include('class="copy-btn"')
   end
 
   it 'adds a comment' do
     # First render to create the markdown file and get the current filename
     get '/diff', path: repo_path
-    filename = last_response.body.match(/File: (.+\.md)/)[1]
+    filename = last_response.body.match(/File: ([^<]+\.md)/)[1]
 
     post '/comment', {
       filename: filename,
@@ -77,7 +78,7 @@ RSpec.describe LocalDiffChecker do
   it 'approves a diff' do
     # First render to create the markdown file and get the current filename
     get '/diff', path: repo_path
-    filename = last_response.body.match(/File: (.+\.md)/)[1]
+    filename = last_response.body.match(/File: ([^<]+\.md)/)[1]
     expect(last_response.body).to include('Approve')
 
     post '/approve', {
