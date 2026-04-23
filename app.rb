@@ -118,6 +118,7 @@ class LocalDiffChecker < Sinatra::Base
     }
 
     @filename = settings.storage.save(prefix, metadata, @diff_text)
+    @full_filename = File.expand_path(File.join(settings.storage.storage_dir, @filename))
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
     fill_gaps(@parsed_diff, @git, @mode)
@@ -150,6 +151,7 @@ class LocalDiffChecker < Sinatra::Base
     }
 
     @filename = settings.storage.save(prefix, metadata, @diff_text, "_uncommited")
+    @full_filename = File.expand_path(File.join(settings.storage.storage_dir, @filename))
     @data = settings.storage.load(@filename)
     @parsed_diff = DiffParser.new(@data[:diff]).parse
     fill_gaps(@parsed_diff, @git, @mode)
