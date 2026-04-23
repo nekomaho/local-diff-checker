@@ -2,6 +2,8 @@ require 'yaml'
 require 'fileutils'
 
 class MarkdownStorage
+  attr_reader :storage_dir
+
   def initialize(storage_dir)
     @storage_dir = storage_dir
     FileUtils.mkdir_p(@storage_dir)
